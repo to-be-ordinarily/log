@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+<bean id="log4jInitialization" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+    <property name="targetClass"
+              value="org.apache.logging.log4j.core.LoggerContext" />
+    <property name="targetMethod" value="getContext" />
+    <property name="arguments">
+        <list>
+            <value>false</value>
+        </list>
+    </property>
+</bean>
+
+<bean id="log4jContext" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+    <property name="targetObject" ref="log4jInitialization"/>
+    <property name="targetMethod" value="setConfigLocation"/>
+    <property name="arguments">
+        <list>
+            <!--<value>classpath:log4j2.xml</value>-->
+            <value>classpath:log4j2-#{systemProperties['spring.profiles.active']}.xml</value>
+        </list>
+    </property>
+</bean>
+</beans>
