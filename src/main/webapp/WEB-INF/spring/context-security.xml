@@ -3,27 +3,46 @@
              xmlns:beans="http://www.springframework.org/schema/beans"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://www.springframework.org/schema/beans
-		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/security
 		http://www.springframework.org/schema/security/spring-security.xsd">
 
    <beans:bean id="customAccessDenied" class="kr.co.log.security.CustomAccessDeniedHandler"/>
    <beans:bean id="customLoginSuccess" class="kr.co.log.security.CustomLoginSuccessHandler"/>
    <beans:bean id="customLoginFailure" class="kr.co.log.security.CustomLoginFailureHandler"/>
-   <beans:bean id="customPasswordEncoder" class="kr.co.log.security.CustomNoOpPasswordEncoder"/>
    <beans:bean id="bcryptPasswordEncoder"	  class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
    <beans:bean id="customUserDetailsService" class="kr.co.log.security.CustomUserDetailsService"/>
+
+   <!-- URL 더블슬래시 허용-->
    <beans:bean id="defaultHttpFirewall" class="org.springframework.security.web.firewall.DefaultHttpFirewall"/>
    <http-firewall ref="defaultHttpFirewall"/>
+
+   <!--
+      정적인 WEB Resource 는 Spring Security 설정을 아예 제외한다.
+      http security="none" 으로 설정해야지 filterChainPoxy 의 filter 를 거치지 않는다.
+    -->
+   <http security="none" pattern="/resources/**"/>
+
+   <!--
+      auto-config : spring security 에서 제공하는 login 페이지 사용여부
+      use-expressions : SpEL 문법 사용 여부
+   -->
    <http auto-config="true" use-expressions="true">
-      <!-- <csrf disabled="true"/> -->
-
+      <!-- 권한 없이 접근 허용되는 URL -->
       <intercept-url pattern="/login" access="permitAll" />
+      <intercept-url pattern="/signup/**" access="permitAll" />
       <intercept-url pattern="/tryLogin" access="permitAll" />
-      <intercept-url pattern="/resources/**" access="permitAll" />
+      <intercept-url pattern="/" access="permitAll" />
 
-      <form-login login-page="/login"
-                  login-processing-url="/tryLogin"
+      <!-- ROLE_MEMBER 권한이 필요한 URL -->
+      <intercept-url pattern="/m/myInfo" access="hasRole('ROLE_MEMBER')" />
+
+      <!-- 등록되지 않은 URL 접근 불가 -->
+      <!--<intercept-url pattern="/**" access="denyAll" />-->
+
+      <!-- form-login : 로그인 시 처리 설정 -->
+      <!--<form-login login-page="/login"-->
+      <form-login
                   authentication-failure-url="/login?err=true"
                   authentication-success-handler-ref="customLoginSuccess"
                   authentication-failure-handler-ref="customLoginFailure"
@@ -31,15 +50,15 @@
                   password-parameter="password"
       />
 
-      <!-- <access-denied-handler error-page="/accessDenied" /> -->
-      <!-- <remember-me data-source-ref="dataSource" token-validity-seconds="604800" /> -->
-      <logout logout-url="/logout" logout-success-url="/login?logout=true" invalidate-session="true" delete-cookies="remember-me,JSESSION_ID" />
+      <!-- invalidate-session : 로그아웃 이후 세션 제거 속성 (default: true) -->
+      <logout logout-url="/logout" logout-success-url="/login?logout=true"  delete-cookies="remember-me,JSESSION_ID" />
+
    </http>
 
+   <!-- DB 연동을 통한 로그인  -->
    <authentication-manager>
       <authentication-provider	user-service-ref="customUserDetailsService">
-         <!-- 		<password-encoder		ref="bcryptPasswordEncoder" /> -->
-         <password-encoder		ref="customPasswordEncoder" />
+         <password-encoder		ref="bcryptPasswordEncoder" />
       </authentication-provider>
    </authentication-manager>
 

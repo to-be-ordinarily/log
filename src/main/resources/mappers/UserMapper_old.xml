@@ -1,14 +1,269 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="kr.co.log.mapper.UserMapper">
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.myungdangga.mapper.UserMapper">
+    <!-- 회원가입/로그인 -->
+    <resultMap type="kr.co.myungdangga.domain.MemberVO" id="memberMap">
+        <id property="usrId" column="USR_ID"/>
+        <result property="usrId" column="USR_ID"/>
+        <result property="usrPw" column="USR_PW"/>
+        <result property="wthdYn" column="WTHD_YN"/>
+        <collection property="authList" resultMap="authMap">
+        </collection>
+    </resultMap>
 
-    <select id="findById" resultType="Map">
-        select USR_ID    as usrId,
-               USR_PW    as usrPw,
-               USR_NM    as usrNm,
-               ERR_CNT   as errCnt,
-               ENABLE_YN as enableYn
-        from USR_INFR
+    <resultMap type="kr.co.myungdangga.domain.AuthVO" id="authMap">
+        <result property="usrId" column="USR_ID"/>
+        <result property="auth" column="AUTH"/>
+    </resultMap>
+
+    <insert id="createUser">
+        insert into USR_INFR (USR_ID, USR_PW, SNS_CD, USR_NM,
+                              PHN_NMBR, EMAIL, ZIP_CD, ADRS, ADRS_DTL)
+        values (#{usrId}, #{usrPw}, #{snsCd}, #{usrNm},
+                #{phnNmbr}, #{email}, #{zipCd}, #{adrs}, #{adrsDtl})
+    </insert>
+
+    <insert id="createUserRole">
+        insert into USR_AUTH (USR_ID, AUTH)
+        values (#{usrId}, #{usrAuth})
+    </insert>
+
+    <select id="loginUser" resultMap="memberMap">
+        select mem.USR_ID, USR_PW, WTHD_YN, AUTH
+        from USR_INFR mem LEFT OUTER JOIN USR_AUTH auth on mem.USR_ID = auth.USR_ID
+        where mem.USR_ID = #{usrId}
     </select>
+
+    <select id="readUser" resultType="Map">
+        select USR_ID as usrId, SNS_CD as snsCd, USR_NM as usrNm, PRFL_IMG as prflImg,
+               PHN_NMBR as phnNmbr, EMAIL as email, ZIP_CD as zipCd, ADRS as adrs, ADRS_DTL as adrsDtl,
+               WTHD_YN as wthdYn, RGST_DTM as rgstDtm, LAST_LOGIN as lastLogin, WTHD_DTM as wthdDtm
+        from USR_INFR
+        where USR_ID = #{usrId}
+    </select>
+
+    <select id="listNotices" resultType="Map">
+        select SEQ as seq, TITLE as title, CTGR as ctgr, CHN as chn, CNTNT as cntnt,
+        STR_DTM as strDtm, END_DTM as endDtm, RGST_DTM as rgstDtm, RGST_ID as rgstId
+        from NTC_INFR
+        where CHN = '홈페이지'
+        <if test="keyword!=null">
+            and (
+            replace(lower(TITLE), ' ', '') like concat('%', lower(#{keyword}), '%')
+            or replace(lower(CNTNT), ' ', '') like concat('%', lower(#{keyword}), '%')
+            )
+        </if>
+        <if test="index!=null">limit #{index}, #{amount}</if>
+    </select>
+
+    <select id="countNotice" resultType="Integer">
+        select count(*) from NTC_INFR
+        where CHN = '홈페이지'
+        <if test="keyword!=null">
+            and (
+            replace(lower(TITLE), ' ', '') like concat('%', lower(#{keyword}), '%')
+            or replace(lower(CNTNT), ' ', '') like concat('%', lower(#{keyword}), '%')
+            )
+        </if>
+    </select>
+
+    <select id="readNotice" resultType="Map">
+        select SEQ as seq, TITLE as title, CTGR as ctgr, CHN as chn, CNTNT as cntnt,
+               STR_DTM as strDtm, END_DTM as endDtm, RGST_DTM as rgstDtm, RGST_ID as rgstId
+        from NTC_INFR
+        where SEQ = #{seq}
+    </select>
+
+    <!-- 문의 및 상담 -->
+    <insert id="createReservationInquiry">
+        insert into RSRV_INQR_INFR (USR_ID, USR_NM, EMAIL, PHN_NMBR,
+                                    PRVC_AGR, MRN_SITE_SEQ, CMPNY_NM, RSRV_DTM, ANSR_STTS)
+        values (#{usrId}, #{usrNm}, #{email}, #{phnNmbr},
+                #{prvcAgr}, #{mrnSiteSeq}, #{cmpnyNm}, #{rsrvDtm}, #{ansrStts})
+    </insert>
+
+    <insert id="createJoinInquiry">
+        insert into JOIN_INQR_INFR (CMPNY_NM, USR_NM, EMAIL, PHN_NMBR, CNTNT, PRVC_AGR)
+        values (#{cmpnyNm}, #{usrNm}, #{email}, #{phnNmbr}, #{cntnt}, #{prvcAgr})
+    </insert>
+
+    <insert id="createPersonalInquiry">
+        insert into PSRN_INQR_INFR (INQR_CTGR, USR_ID, USR_NM, EMAIL, PHN_NMBR,
+                                    CNTNT, IMG_PATH1, IMG_PATH2, IMG_PATH3, PRVC_AGR)
+        values (#{inqrCtgr}, #{usrId}, #{usrNm}, #{email}, #{phnNmbr},
+                #{cntnt}, #{imgPath1}, #{imgPath2}, #{imgPath3}, #{prvcAgr})
+    </insert>
+
+    <select id="listPersonalInquiry" resultType="Map">
+        select SEQ as seq, USR_ID as usrId, USR_NM as usrNm, EMAIL as email, PHN_NMBR as phnNmbr,
+        INQR_CTGR as inqrCtgr, CNTNT as cntnt, IMG_PATH1 as imgPath1, IMG_PATH2 as imgPath2, IMG_PATH3 as imgPath3,
+        PRVC_AGR as prvcAgr, INQR_DTM as inqrDtm, ANSR_CNTNT as ansrCntnt, ANSR_ID as ansrId, ANSR_DTM as ansrDtm
+        from PSRN_INQR_INFR
+        where USR_ID = #{usrId}
+        <if test="index!=null">limit #{index}, #{amount}</if>
+    </select>
+
+    <select id="countPersonalInquiry" resultType="Integer">
+        select count(*) from PSRN_INQR_INFR
+        where USR_ID = #{usrId}
+    </select>
+
+    <!-- '찜' 및 비교하기 -->
+    <insert id="createConcern">
+        insert into CNCR_LOG (USR_ID, MRN_SITE_SEQ)
+        values (#{usrId}, #{mrnSiteSeq})
+    </insert>
+
+    <delete id="deleteConcern">
+        delete from CNCR_LOG
+        <where>
+            <if test="usrId!=null">and USR_ID = #{usrId}</if>
+            <if test="mrnSiteSeq!=null">and MRN_SITE_SEQ = #{mrnSiteSeq}</if>
+        </where>
+    </delete>
+
+    <select id="listConcerns" resultType="Map">
+        select MRN_SITE_SEQ as mrnSiteSeq, CNCR_DTM as cncrDtm from CNCR_LOG
+        where USR_ID = #{usrId}
+    </select>
+
+    <insert id="createCompareLog">
+        insert into CMPR_LOG (USR_ID, MRN_SITE_SEQ1, MRN_SITE_SEQ2, MRN_SITE_SEQ3)
+        values (#{usrId}, #{mrnSiteSeq1}, #{mrnSiteSeq2}, #{mrnSiteSeq3})
+    </insert>
+
+    <!-- 마이페이지 -->
+    <insert id="createBookmark">
+        insert into BKMK_LOG (USR_ID, MRN_SITE_SEQ)
+        values (#{usrId}, #{mrnSiteSeq})
+    </insert>
+
+    <select id="listBookmarks" resultType="Map">
+        select MRN_SITE_SEQ as mrnSiteSeq, BKMK_DTM as bkmkDtm from BKMK_LOG
+        where USR_ID = #{usrId}
+    </select>
+
+    <delete id="deleteBookmark">
+        delete from BKMK_LOG
+        <where>
+            <if test="usrId!=null">and USR_ID = #{usrId}</if>
+            <if test="mrnSiteSeq!=null">and MRN_SITE_SEQ = #{mrnSiteSeq}</if>
+        </where>
+    </delete>
+
+    <insert id="createBookmarkHistory">
+        insert into BKMK_HSTR_LOG (MRN_SITE_SEQ, ADD_YN, USR_ID)
+        values (#{mrnSiteSeq}, #{addYn}, #{usrId})
+    </insert>
+
+    <select id="listSiteByViewCount" resultType="Map">
+        select MRN_SITE_SEQ as mrnSiteSeq, count(*) as cnt from MRN_SITE_VW_LOG
+        where USR_ID = #{usrId}
+        group by MRN_SITE_SEQ
+        order by CNT desc
+    </select>
+
+    <select id="listSiteByRecentView" resultType="Map">
+        select SEQ as seq, MRN_SITE_SEQ as mrnSiteSeq, VW_DTM as vwDtm from MRN_SITE_VW_LOG
+        where USR_ID = #{usrId}
+        order by VW_DTM desc
+    </select>
+
+    <select id="listMourningSitesFromSeqList" resultType="Map">
+        select SEQ as seq, CMPNY_ID as cmpnyId, CMPNY_NM as cmpnyNm, JOIN_STTS as joinStts, EST_CTGR as estCtgr, BSNS_NMBR as bsnsNmbr,
+        ORG1 as org1, ORG2 as org2, RPRS_NM as rprsNm, EST_DTM as estDtm, EST_SIZE as estSize, CPCT as cpct, PHN_NMBR as phnNmbr,
+        PRKN_CNT as prknCnt, FAX_NMBR as faxNmbr, ZIP_CD as zipCd, SITE_ADRS as siteAdrs, SITE_ADRS_DTL as siteAdrsDtl,
+        LOGO_IMG_PATH as logoImgPath, INFR_IMG_PATH as infrImgPath, SRCH_IMG_PATH as srchImgPath, OPRT_HR as oprtHr,
+        RSTR_YN as rstrYn, CNVN_YN as cnvnYn, PRKN_YN as prknYn, WTR_YN as wtrYn, CHLNG_YN as chlngYn, LATITUDE as latitude, LONGITUDE as longitude,
+        BRL_GRV_YN as brlGrvYn, ESR_GRV_YN as esrGrvYn, FLT_GRV_YN as fltGrvYn, OTHER_GRV_YN as otherGrvYn,
+        WDLD_BRL_YN as wdldBrlYn, FLWR_BRL_YN as flwrBrlYn, GRS_BRL_YN as grsBrlYn, OTHER_BRL_YN as otherBrlYn,
+        ESR_RM_YN as esrRmYn, ESR_WL_YN as esrWlYn, ESR_TW_YN as esrTwYn, ESR_OTHER_YN as esrOtherYn,
+        OCN_BRL_YN as ocnBrlYn, MTN_BRL_YN as mtnBrlYn, SPC_BRL_YN as spcBrlYn, WEBSITE_URL as websiteUrl, MIN_PRC as minPrc,
+        sqrt((LONGITUDE - #{rgnLng}) * (LONGITUDE - #{rgnLng}) + (LATITUDE - #{rgnLat}) * (LATITUDE - #{rgnLat})) * pi() / 180 * 6371 distance,
+        sqrt((LONGITUDE - #{gpsLng}) * (LONGITUDE - #{gpsLng}) + (LATITUDE - #{gpsLat}) * (LATITUDE - #{gpsLat})) * pi() / 180 * 6371 gpsDist
+        from MRN_SITE_INFR
+        where SEQ in
+        <foreach collection="seqList" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        order by field(SEQ,
+        <foreach collection="seqList" item="item" index="index" separator=",">
+            #{item}
+        </foreach>
+        )
+        <if test="index!=null">limit #{index}, #{amount}</if>
+    </select>
+
+    <update id="updateUser">
+        update USR_INFR
+        <set>
+            <if test="usrNm!=null">USR_NM = #{usrNm},</if>
+            <if test="phnNmbr!=null">PHN_NMBR = #{phnNmbr},</if>
+            <if test="email!=null">EMAIL = #{email},</if>
+            <if test="zipCd!=null">ZIP_CD = #{zipCd},</if>
+            <if test="adrs!=null">ADRS = #{adrs},</if>
+            <if test="adrsDtl!=null">ADRS_DTL = #{adrsDtl},</if>
+            <if test="prflImg!=null">PRFL_IMG = #{prflImg},</if>
+            <if test="lastLogin!=null">LAST_LOGIN = #{lastLogin},</if>
+            <if test="wthdYn!=null">WTHD_YN = #{wthdYn},</if>
+            <if test="wthdDtm!=null">WTHD_DTM = #{wthdDtm},</if>
+        </set>
+        where USR_ID = #{usrId}
+    </update>
+
+    <!-- 트래픽 -->
+    <insert id="createTrafficLog">
+        insert into TRFC_LOG (SD_NM, SGG_NM, IP_ADRS, USR_ID, DVC, PAGE, MRN_SITE_SEQ)
+        values (#{sdNm}, #{sggNm}, #{ipAdrs}, #{usrId}, #{dvc}, #{page}, #{mrnSiteSeq})
+    </insert>
+
+    <!-- 인증번호 -->
+    <insert id="createCertification">
+        insert into CERT_CODE (PHN_NMBR, EMAIL, CODE)
+        values(#{phnNmbr}, #{email}, #{code});
+    </insert>
+
+    <select id="checkCertification" resultType="map">
+        select PHN_NMBR as phnNmbr, EMAIL as email, CODE as code
+        from CERT_CODE
+        <where>
+            <if test="phnNmbr!=null">and PHN_NMBR = #{phnNmbr}</if>
+            <if test="email!=null">and EMAIL = #{email}</if>
+            <if test="code!=null">and CODE = #{code}</if>
+        </where>
+    </select>
+
+    <delete id="deleteCertification">
+        delete from CERT_CODE
+        <where>
+            <if test="phnNmbr!=null">and PHN_NMBR = #{phnNmbr}</if>
+            <if test="email!=null">and EMAIL = #{email}</if>
+            <if test="code!=null">and CODE = #{code}</if>
+        </where>
+    </delete>
+
+    <insert id="createSubmission">
+        insert into M2X_SUBMIT (MSG_TYPE, STATUS, SUBJECT, SCHEDULE_TIME, MESSAGE, CALLBACK_NUM,
+                                RCPT_DATA, FILE_COUNT, FILE_NAME1, K_TMPLCODE, K_MESSAGE, K_BUTTON, K_ADFLAG, K_SENDERKEY)
+        values (#{msgType}, #{status}, #{subject}, #{scheduleTime}, #{message}, #{callbackNum},
+                #{rcptData}, #{fileCount}, #{fileName1}, #{kTmplcode}, #{kMessage}, #{kButton}, #{kAdflag}, #{kSenderkey})
+    </insert>
+
+    <select id="checkUser" resultType="String">
+        select USR_ID as usrId from USR_INFR
+        <where>
+            <if test="usrId!=null">and USR_ID = #{usrId}</if>
+            <if test="phnNmbr!=null">and PHN_NMBR = #{phnNmbr}</if>
+            <if test="email!=null">and EMAIL = #{email}</if>
+        </where>
+    </select>
+
+    <update id="changePw">
+        update USR_INFR
+        set USR_PW = #{usrPw}
+        where USR_ID = #{usrId}
+    </update>
 
 </mapper>

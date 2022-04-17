@@ -1,9 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="kr.co.log.mapper.HomeMapper">
+<mapper namespace="kr.co.log.mapper.UserMapper">
+    <resultMap type="kr.co.log.domain.MemberVO" id="memberMap">
+        <id property="usrId" column="usrId"/>
+        <result property="usrId" column="usrId"/>
+        <result property="usrPw" column="usrPw"/>
+        <result property="wthdYn" column="wthdYn"/>
+        <result property="enableYn" column="enableYn"/>
+        <result property="usrNm" column="usrNm"/>
+        <collection property="authList" resultMap="authMap">
+        </collection>
+    </resultMap>
 
-    <select id="findAll" resultType="Map">
-        select * from home
+    <resultMap type="kr.co.log.domain.AuthVO" id="authMap">
+        <result property="usrId" column="usrId"/>
+        <result property="auth" column="auth"/>
+    </resultMap>
+    <insert id="createUser">
+        insert into USR_INFR (USR_ID, USR_PW, USR_NM, WTHD_YN, ERR_CNT, ENABLE_YN)
+        values (#{usrId}, #{usrPw}, #{usrNm}, 'N', 0, 'Y');
+    </insert>
+
+    <insert id="createAuth">
+        insert into USR_AUTH (USR_ID, AUTH)
+        values (#{usrId}, 'ROLE_MEMBER');
+    </insert>
+
+    <select id="findById" resultMap="memberMap">
+        select usr.USR_ID as usrId,
+               USR_PW     as usrPw,
+               USR_NM     as usrNm,
+               WTHD_YN    as wthdYn,
+               ERR_CNT    as errCnt,
+               ENABLE_YN  as enableYn,
+               AUTH       as auth
+        from USR_INFR as usr
+        LEFT OUTER JOIN USR_AUTH auth on usr.USR_ID = auth.USR_ID
+        where usr.USR_ID = #{usrId}
     </select>
 
 </mapper>
