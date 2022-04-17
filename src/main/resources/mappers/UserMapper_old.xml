@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.log.mapper.UserMapper">
+
+    <select id="findById" resultType="Map">
+        select USR_ID    as usrId,
+               USR_PW    as usrPw,
+               USR_NM    as usrNm,
+               ERR_CNT   as errCnt,
+               ENABLE_YN as enableYn
+        from USR_INFR
+    </select>
+
+</mapper>
