@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/security
+		http://www.springframework.org/schema/security/spring-security.xsd">
+
+   <beans:bean id="customAccessDenied" class="kr.co.log.security.CustomAccessDeniedHandler"/>
+   <beans:bean id="customLoginSuccess" class="kr.co.log.security.CustomLoginSuccessHandler"/>
+   <beans:bean id="customLoginFailure" class="kr.co.log.security.CustomLoginFailureHandler"/>
+   <beans:bean id="customPasswordEncoder" class="kr.co.log.security.CustomNoOpPasswordEncoder"/>
+   <beans:bean id="bcryptPasswordEncoder"	  class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+   <beans:bean id="customUserDetailsService" class="kr.co.log.security.CustomUserDetailsService"/>
+   <beans:bean id="defaultHttpFirewall" class="org.springframework.security.web.firewall.DefaultHttpFirewall"/>
+   <http-firewall ref="defaultHttpFirewall"/>
+   <http auto-config="true" use-expressions="true">
+      <!-- <csrf disabled="true"/> -->
+
+      <intercept-url pattern="/login" access="permitAll" />
+      <intercept-url pattern="/tryLogin" access="permitAll" />
+      <intercept-url pattern="/resources/**" access="permitAll" />
+
+      <form-login login-page="/login"
+                  login-processing-url="/tryLogin"
+                  authentication-failure-url="/login?err=true"
+                  authentication-success-handler-ref="customLoginSuccess"
+                  authentication-failure-handler-ref="customLoginFailure"
+                  username-parameter="username"
+                  password-parameter="password"
+      />
+
+      <!-- <access-denied-handler error-page="/accessDenied" /> -->
+      <!-- <remember-me data-source-ref="dataSource" token-validity-seconds="604800" /> -->
+      <logout logout-url="/logout" logout-success-url="/login?logout=true" invalidate-session="true" delete-cookies="remember-me,JSESSION_ID" />
+   </http>
+
+   <authentication-manager>
+      <authentication-provider	user-service-ref="customUserDetailsService">
+         <!-- 		<password-encoder		ref="bcryptPasswordEncoder" /> -->
+         <password-encoder		ref="customPasswordEncoder" />
+      </authentication-provider>
+   </authentication-manager>
+
+
+</beans:beans>

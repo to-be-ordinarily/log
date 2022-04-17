@@ -1,26 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-<bean id="log4jInitialization" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-    <property name="targetClass"
-              value="org.apache.logging.log4j.core.LoggerContext" />
-    <property name="targetMethod" value="getContext" />
-    <property name="arguments">
-        <list>
-            <value>false</value>
-        </list>
-    </property>
-</bean>
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
 
-<bean id="log4jContext" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-    <property name="targetObject" ref="log4jInitialization"/>
-    <property name="targetMethod" value="setConfigLocation"/>
-    <property name="arguments">
-        <list>
-            <!--<value>classpath:log4j2.xml</value>-->
-            <value>classpath:log4j2-#{systemProperties['spring.profiles.active']}.xml</value>
-        </list>
-    </property>
-</bean>
+    <context:component-scan base-package="kr.co.log.controller"/>
+    <context:component-scan base-package="kr.co.log.service"/>
+    <context:component-scan base-package="kr.co.log.persistence"/>
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+        <property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"/>
+        <property name="url" value="jdbc:log4jdbc:mariadb://localhost:3306/spring_security"/>
+        <property name="username" value="root"/>
+        <property name="password" value="root"/>
+        <property name="validationQuery" value="select 1"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="timeBetweenEvictionRunsMillis" value="1000000"/>
+        <property name="numTestsPerEvictionRun" value="10"/>
+    </bean>
+
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="mapperLocations" value="classpath:mappers/**/*Mapper.xml"/>
+    </bean>
+
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" destroy-method="clearCache">
+        <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
 </beans>
