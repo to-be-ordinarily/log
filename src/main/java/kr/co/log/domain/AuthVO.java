@@ -9,9 +9,6 @@ public class AuthVO {
     private String usrId;
     private String auth;
 
-    public AuthVO() {
-    }
-
     public AuthVO(String usrId, String auth) {
         this.usrId = usrId;
         this.auth = auth;

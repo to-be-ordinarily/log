@@ -29,7 +29,6 @@ public class CustomLoginFailureHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException, ServletException {
-        // TODO Auto-generated method stub
         ObjectMapper mapper = new ObjectMapper(); // JSON 변경용
 
         ResponseDataDTO responseDataDTO = new ResponseDataDTO();
@@ -49,7 +48,7 @@ public class CustomLoginFailureHandler implements AuthenticationFailureHandler {
             responseDataDTO.setMessage("알수 없는 오류가 발생했습니다.");
         }
 
-        Map<String, String> items = new HashMap<String, String>();
+        Map<String, String> items = new HashMap<>();
         responseDataDTO.setItem(items);
 
         response.setCharacterEncoding("UTF-8");

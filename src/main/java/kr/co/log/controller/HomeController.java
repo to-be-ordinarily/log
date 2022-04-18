@@ -1,18 +1,14 @@
 package kr.co.log.controller;
 
 
+import kr.co.log.common.CurrentUser;
 import kr.co.log.domain.MemberVO;
 import kr.co.log.dto.ResponseDTO;
-import kr.co.log.security.domain.CustomUser;
 import kr.co.log.service.HomeService;
 import kr.co.log.service.MemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -32,8 +28,7 @@ public class HomeController {
     }
 
     @RequestMapping("/")
-    public String home(@AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : MemberVO") MemberVO memberVO) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public String home(@CurrentUser MemberVO memberVO) {
         log.debug("debug log");
         log.info("info log");
         log.warn("warn log");
@@ -41,10 +36,9 @@ public class HomeController {
         return "index";
     }
 
-    @GetMapping("/signup/{role}/{usrId}/{usrPw}/{usrNm}")
+    @GetMapping("/signup/{usrId}/{usrPw}/{usrNm}")
     public MemberVO createUser(@ModelAttribute MemberVO memberVO) {
-        MemberVO memberVO1 = userService.createMember(memberVO);
-        return memberVO1;
+        return userService.createMember(memberVO);
     }
 
 

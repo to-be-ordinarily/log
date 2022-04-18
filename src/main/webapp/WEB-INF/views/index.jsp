@@ -1,16 +1,25 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: syeol
-  Date: 2022/04/05
-  Time: 7:41 PM
-  To change this template use File | Settings | File Templates.
---%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+
+<!DOCTYPE html>
+<html lang="ko" xml:lang="ko">
   <head>
-    <title>$Title$</title>
+    <title>Home Page</title>
+    <meta content="text/html; charset=utf-8" />
   </head>
+
   <body>
-  $END$
+    <h2>Hello World!</h2>
+
+    <hr>
+    <sec:authorize access="isAuthenticated()">
+      <p>principal : <sec:authentication property="principal" /></p>
+      <p>principal : <sec:authentication property="principal.user.usrNm" /></p>
+      <p>principal : <sec:authentication property="principal.user.usrPw" /></p>
+    </sec:authorize>
+    <form:form action="${pageContext.request.contextPath}/logout" method="POST">
+      <input type="submit" value="Logout" />
+    </form:form>
   </body>
 </html>
+

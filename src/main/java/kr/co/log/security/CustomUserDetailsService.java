@@ -18,23 +18,14 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        UserDetails result = null;
-
         try {
             MemberVO user = dao.loginUser(username);
-
-            if (user == null) {
-                throw new UsernameNotFoundException("===== Cannot find a user =====");
-            }
-
-            result = new CustomUser(user);
+            return new CustomUser(user);
         }
         catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new UsernameNotFoundException("===== Cannot find a user =====");
         }
 
-        return result;
     }
 
 }

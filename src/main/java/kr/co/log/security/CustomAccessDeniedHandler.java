@@ -14,11 +14,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        // TODO Auto-generated method stub
-
-        System.out.println("Access Denied Handler");
-
-        System.out.println("Redirect....");
         accessDeniedException.printStackTrace();
         response.sendRedirect("/login");
     }
