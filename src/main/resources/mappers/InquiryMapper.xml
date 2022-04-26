@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="inquiryMapper">
+    <insert id="insertPersonal">
+        insert into PSRN_INQR_INFR (INQR_CTGR, USR_ID, USR_NM, EMAIL, PHN_NMBR,
+                                    CNTNT, IMG_PATH1, IMG_PATH2, IMG_PATH3, PRVC_AGR)
+        values (#{inqrCtgr}, #{usrId}, #{usrNm}, #{email}, #{phnNmbr},
+                #{cntnt}, #{imgPath1}, #{imgPath2}, #{imgPath3}, #{prvcAgr})
+    </insert>
+</mapper>
