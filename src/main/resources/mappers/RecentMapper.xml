@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="recentMapper">
+    <select id="getRecentList" resultType="List">
+        select CMPNY_ID      as cmpnyId
+             , CMPNY_NM      as cmpnyNm
+             , JOIN_STTS     as joinStts
+             , EST_CTGR      as estCtgr
+             , BSNS_NMBR     as bsnsNmbr
+             , ORG1          as org1
+             , ORG2          as org2
+             , RPRS_NM       as rprsNm
+             , EST_DTM       as estDtm
+             , EST_SIZE      as estSize
+             , CPCT          as cpct
+             , PHN_NMBR      as phnNmbr
+             , PRKN_CNT      as prknCnt
+             , FAX_NMBR      as faxNmbr
+             , ZIP_CD        as zipCd
+             , SITE_ADRS     as siteAdrs
+             , SITE_ADRS_DTL as siteAdrsDtl
+             , LOGO_IMG_PATH as logoImgPath
+             , INFR_IMG_PATH as infrImgPath
+             , SRCH_IMG_PATH as srchImgPath
+             , OPRT_HR       as oprtHr
+             , RSTR_YN       as rstrYn
+             , CNVN_YN       as cnvnYn
+             , PRKN_YN       as prknYn
+             , WTR_YN        as wtrYn
+             , CHLNG_YN      as chlngYn
+             , LATITUDE      as latitude
+             , LONGITUDE     as longitude
+             , BRL_GRV_YN    as brlGrvYn
+             , ESR_GRV_YN    as esrGrvYn
+             , FLT_GRV_YN    as fltGrvYn
+             , OTHER_GRV_YN  as otherGrvYn
+             , WDLD_BRL_YN   as wdldBrlYn
+             , FLWR_BRL_YN   as flwrBrlYn
+             , GRS_BRL_YN    as grsBrlYn
+             , OTHER_BRL_YN  as otherBrlYn
+             , ESR_RM_YN     as esrRmYn
+             , ESR_WL_YN     as esrWlYn
+             , ESR_TW_YN     as esrTwYn
+             , ESR_OTHER_YN  as esrOtherYn
+             , OCN_BRL_YN    as ocnBrlYn
+             , MTN_BRL_YN    as mtnBrlYn
+             , SPC_BRL_YN    as spcBrlYn
+             , WEBSITE_URL   as websiteUrl
+             , MIN_PRC       as minPrc
+             , sqrt((LONGITUDE - #{rgnLng}) * (LONGITUDE - #{rgnLng}) + (LATITUDE - #{rgnLat}) * (LATITUDE - #{rgnLat})) * pi() / 180 * 6371 distance
+             , sqrt((LONGITUDE - #{gpsLng}) * (LONGITUDE - #{gpsLng}) + (LATITUDE - #{gpsLat}) * (LATITUDE - #{gpsLat})) * pi() / 180 * 6371 gpsDis
+        from MRN_SITE_INFR
+        where CMPNY_ID in
+        <foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        order by field(CMPNY_ID,
+        <foreach collection="idList" item="item" index="index" separator=",">
+            #{item}
+        </foreach>
+        )
+        <if test="index!=null">limit #{index} offset #{amount}</if>
+    </select>
+</mapper>
