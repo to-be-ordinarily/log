@@ -26,6 +26,10 @@ public class InquiryDao {
     }
 
     public int selectTotalCount(String usrId) {
-        return session.selectOne("inquriyMapper.selectTotalCount", usrId);
+        return session.selectOne("inquiryMapper.selectTotalCount", usrId);
+    }
+
+    public Integer insertJoin(Map<String, Object> requestMap) {
+        return session.insert("inquiryMapper.insertJoin", requestMap);
     }
 }

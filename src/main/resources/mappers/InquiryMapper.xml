@@ -37,4 +37,9 @@
           from PSRN_INQR_INFR
     </select>
 
+    <insert id="insertJoinInquiry">
+        insert into JOIN_INQR_INFR (CMPNY_NM, USR_NM, EMAIL, PHN_NMBR, CNTNT, PRVC_AGR)
+        values (#{cmpnyNm}, #{usrNm}, #{email}, #{phnNmbr}, #{cntnt}, #{prvcAgr})
+    </insert>
+
 </mapper>

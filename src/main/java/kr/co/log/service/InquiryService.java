@@ -79,4 +79,15 @@ public class InquiryService {
 
     }
 
+    /**
+     * 입점 문의 등록
+     * @param requestMap 입점 문의 정보
+     */
+    public void registerJoin(Map<String, Object> requestMap) {
+        Integer insertResult = dao.insertJoin(requestMap);
+        if(insertResult != 1){
+            throw new IllegalArgumentException("에러");
+        }
+    }
+
 }
