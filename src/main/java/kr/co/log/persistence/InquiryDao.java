@@ -32,4 +32,8 @@ public class InquiryDao {
     public Integer insertJoin(Map<String, Object> requestMap) {
         return session.insert("inquiryMapper.insertJoin", requestMap);
     }
+
+    public Integer insertReservation(Map<String, Object> requestMap) {
+        return session.insert("inquiryMapper.insertReservation", requestMap);
+    }
 }

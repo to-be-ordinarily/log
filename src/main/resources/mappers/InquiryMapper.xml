@@ -42,4 +42,11 @@
         values (#{cmpnyNm}, #{usrNm}, #{email}, #{phnNmbr}, #{cntnt}, #{prvcAgr})
     </insert>
 
+    <insert id="insertReservation">
+        insert into RSRV_INQR_INFR (USR_ID, USR_NM, EMAIL, PHN_NMBR,
+                                    PRVC_AGR, MRN_SITE_SEQ, CMPNY_NM, RSRV_DTM, ANSR_STTS)
+        values (#{usrId}, #{usrNm}, #{email}, #{phnNmbr},
+                #{prvcAgr}, #{mrnSiteSeq}, #{cmpnyNm}, #{rsrvDtm}, #{ansrStts})
+    </insert>
+
 </mapper>

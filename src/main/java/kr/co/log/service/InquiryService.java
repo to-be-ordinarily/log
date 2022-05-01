@@ -90,4 +90,15 @@ public class InquiryService {
         }
     }
 
+    /**
+     * 예약 문의 등록
+     * @param requestMap 예약 문의 정보
+     */
+    public void registerReservation(Map<String, Object> requestMap) {
+        Integer insertReservation = dao.insertReservation(requestMap);
+        if (insertReservation != 1) {
+            throw new IllegalArgumentException("에러");
+        }
+    }
+
 }
