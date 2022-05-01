@@ -1,12 +1,12 @@
 package kr.co.log.service;
 
-import kr.co.log.constans.UploadFileType;
+import kr.co.log.persistence.InquiryDao;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,11 +14,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class InquiryService {
 
-    private final InquiryDao inquiryDao;
-    private final FileUploadService fileUploadService;
+    private final InquiryDao dao;
 
-    @Value("#{config['user.inquiryImg.path']}")
-    String inquiryImgPath;
+//    @Value("#{config['user.inquiryImg.path']}")
+//    String inquiryImgPath;
 
     /**
      * 1:1 문의 등록 서비스 - 파일 업로드 및 문의 글 등록
@@ -29,11 +28,42 @@ public class InquiryService {
     public void registerPersonal(Map<String, Object> requestMap, List<MultipartFile> files) throws IOException {
 
         // 파일 업로드
-        List<String> fileNames = fileUploadService.saveMultiFile(files, inquiryImgPath, UploadFileType.IMG);
-        setfileName(requestMap, fileNames);
+        //List<String> fileNames = fileUploadService.saveMultiFile(files, inquiryImgPath, UploadFileType.IMG);
+        //setfileName(requestMap, fileNames);
 
-        inquiryDao.registerPersonal(requestMap);
+        dao.registerPersonal(requestMap);
 
+    }
+
+    /**
+     * 1:1 문의
+     * @param requestMap usrId : 사용자 ID(필수), index: 페이지당 게시물 게수(선택), offset: 페이지(선택)
+     * @return 사용자에 따른 1:1 문의 게수물 정보 및 총 건수
+     */
+    public Map<String, Object> getPersonalInquiry(Map<String, Object> requestMap){
+
+        List<Map<String, Object>> inquiryList = dao.selectPersonalInquiry(requestMap);
+
+        String usrId = "";
+        Integer totalCount = dao.selectTotalCount(usrId);
+        Map<String, Object> responseMap = new HashMap<>();
+
+        responseMap.put("inquiryList", inquiryList);
+        responseMap.put("totalCount", totalCount);
+
+        // 디버깅필요
+        /*for (Map<String, Object> pi : result) {
+            for (int i = 1; i < 4; i++) {
+                String ip = (String) pi.get("imgPath" + i);
+                if (ip == null) {
+                    continue;
+                }
+
+                pi.put("imgPath" + i, ip);
+            }
+        }*/
+
+        return responseMap;
     }
 
     /**

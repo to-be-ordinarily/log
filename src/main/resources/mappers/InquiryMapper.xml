@@ -7,4 +7,34 @@
         values (#{inqrCtgr}, #{usrId}, #{usrNm}, #{email}, #{phnNmbr},
                 #{cntnt}, #{imgPath1}, #{imgPath2}, #{imgPath3}, #{prvcAgr})
     </insert>
+
+    <select id="selectPersonalInquiry" resultType="Map">
+        select SEQ        as seq
+             , USR_ID     as usrId
+             , USR_NM     as usrNm
+             , EMAIL      as email
+             , PHN_NMBR   as phnNmbr
+             , INQR_CTGR  as inqrCtgr
+             , CNTNT      as cntnt
+             , IMG_PATH1  as imgPath1
+             , IMG_PATH2  as imgPath2
+             , IMG_PATH3  as imgPath3
+             , PRVC_AGR   as prvcAgr
+             , INQR_DTM   as inqrDtm
+             , ANSR_CNTNT as ansrCntnt
+             , ANSR_ID    as ansrId
+             , ANSR_DTM   as ansrDtm
+        from PSRN_INQR_INFR
+        where USR_ID = #{usrId}
+        order by inqrDtm desc
+        <if test="index != null and index != '' and amount != null and amount != '' ">
+        limit #{index} offset #{amount}
+        </if>
+    </select>
+
+    <select id="selectTotalCount">
+        select count(seq) as totalCount
+          from PSRN_INQR_INFR
+    </select>
+
 </mapper>
